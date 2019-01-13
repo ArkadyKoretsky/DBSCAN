@@ -4,13 +4,14 @@
 
 using namespace std;
 
-/*
-#define noise -1;
-#define unclassified 0;
-*/
 
+#define noise -1
+#define unclassified 0
+
+/*
 const int noise = -1;
 const int unclassified = 0;
+*/
 
 class Point
 {
@@ -18,6 +19,14 @@ class Point
 	int label; // what cluster in belongs to
 
 public:
+
+	bool operator < (Point& A) 
+	{
+		if (x < A.x) return true;
+		if (x > A.x) return false;
+		return y < A.y;
+	}
+
 	double distance(Point& point)
 	{
 		double xDistance = this->x - point.x;
@@ -48,6 +57,7 @@ class DBSCAN
 	int minimumAmountOfPoints;
 	int amountOfClusters;
 
+public:
 	// constructors
 	DBSCAN(set<Point> setOfPoints, double epsilon, int minimumAmountOfPoints)
 	{
@@ -103,3 +113,26 @@ class DBSCAN
 		return neighbors;
 	}
 };
+
+void main()
+{
+	set<Point> dataBase;
+	dataBase.insert(Point(0.0, 0.0));
+	dataBase.insert(Point(1.0, 1.0));
+	dataBase.insert(Point(1.0, 2.0));
+	dataBase.insert(Point(1.0, 3.0));
+	dataBase.insert(Point(1.0, 6.0));
+	dataBase.insert(Point(2.0, 6.0));
+	dataBase.insert(Point(2.0, 2.0));
+	dataBase.insert(Point(5.0, 1.0));
+	dataBase.insert(Point(5.0, 2.0));
+	dataBase.insert(Point(6.0, 1.0));
+	dataBase.insert(Point(6.0, 2.0));
+
+	DBSCAN cluster(dataBase, 2.0, 4);
+
+	cluster.clusterAlgorithm();
+
+	for (Point point : dataBase)
+		cout << point.getLabel() << " ";
+}
