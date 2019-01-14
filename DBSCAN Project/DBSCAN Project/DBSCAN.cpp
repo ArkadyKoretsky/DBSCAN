@@ -4,28 +4,15 @@
 
 using namespace std;
 
-
 #define noise -1
 #define unclassified 0
-
-/*
-const int noise = -1;
-const int unclassified = 0;
-*/
 
 class Point
 {
 	double x, y;
-	int label; // what cluster in belongs to
+	int label; // what cluster it belongs to
 
 public:
-
-	bool operator < (Point& A) 
-	{
-		if (x < A.x) return true;
-		if (x > A.x) return false;
-		return y < A.y;
-	}
 
 	double distance(Point& point)
 	{
@@ -45,17 +32,32 @@ public:
 	// destructors
 	~Point() {}
 
-	// getters and setters
-	int getLabel() { return label; }
-	void setLabel(int label) { this->label = label; }
+	// getters and seters
+	int getLabel() { return label; } 
+	void setLabel(int newabel) { this->label = label; }
+
+	// operators
+	friend bool operator == (const Point& left, const Point& right)
+	{
+		return left.x == right.x && left.y == right.y;
+	}
+
+	friend bool operator < (const Point& left, const Point& right)
+	{
+		if (left.x < right.x)
+			return true;
+		if (left.x > right.x)
+			return false;
+		return left.y < right.y;
+	}
 };
 
 class DBSCAN
 {
 	set<Point> setOfPoints;
 	double epsilon;
-	int minimumAmountOfPoints;
-	int amountOfClusters;
+	unsigned int minimumAmountOfPoints;
+	unsigned int amountOfClusters;
 
 public:
 	// constructors
@@ -68,10 +70,7 @@ public:
 	}
 
 	// destructors
-	~DBSCAN()
-	{
-
-	}
+	~DBSCAN() {}
 
 	void clusterAlgorithm()
 	{
@@ -99,7 +98,7 @@ public:
 				neighbors = rangeQuery(point);
 				if (neighbors.size() >= minimumAmountOfPoints)
 					for (Point point : neighbors)
-						seed.insert(point);
+							seed.insert(point);
 			}
 		}
 	}
@@ -114,7 +113,7 @@ public:
 	}
 };
 
-void main()
+int main()
 {
 	set<Point> dataBase;
 	dataBase.insert(Point(0.0, 0.0));
@@ -135,4 +134,8 @@ void main()
 
 	for (Point point : dataBase)
 		cout << point.getLabel() << " ";
+
+	system("pause");
+
+	return 0;
 }
