@@ -34,7 +34,7 @@ public:
 
 	// getters and seters
 	int getLabel() { return label; } 
-	void setLabel(int newabel) { this->label = label; }
+	void setLabel(int label) { this->label = label; }
 
 	// operators
 	friend bool operator == (const Point& left, const Point& right)
@@ -111,6 +111,8 @@ public:
 				neighbors.insert(point);
 		return neighbors;
 	}
+
+	set<Point> getSetOfPoints() { return this->setOfPoints; }
 };
 
 int main()
@@ -132,7 +134,7 @@ int main()
 
 	cluster.clusterAlgorithm();
 
-	for (Point point : dataBase)
+	for (Point point : cluster.getSetOfPoints())
 		cout << point.getLabel() << " ";
 
 	system("pause");
