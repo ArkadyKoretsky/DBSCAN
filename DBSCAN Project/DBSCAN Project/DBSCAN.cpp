@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
-#include <set>
+#include <unordered_set>
+#include <fstream>
 
 using namespace std;
 
@@ -13,14 +14,6 @@ class Point
 	int label; // what cluster it belongs to
 
 public:
-
-	double distance(Point& point)
-	{
-		double xDistance = this->x - point.x;
-		double yDistance = this->y - point.y;
-		return sqrt(xDistance * xDistance + yDistance * yDistance);
-	}
-
 	// constructors
 	Point(double x, double y)
 	{
@@ -33,8 +26,12 @@ public:
 	~Point() {}
 
 	// getters and seters
-	int getLabel() { return label; } 
+	int getLabel() { return label; }
 	void setLabel(int label) { this->label = label; }
+
+	// those getters are not necessary for the algorithm, they exist for the printings in the main 
+	double getX() { return x; }
+	double getY() { return y; }
 
 	// operators
 	friend bool operator == (const Point& left, const Point& right)
@@ -42,26 +39,25 @@ public:
 		return left.x == right.x && left.y == right.y;
 	}
 
-	friend bool operator < (const Point& left, const Point& right)
+	// methods
+	double distance(Point& point)
 	{
-		if (left.x < right.x)
-			return true;
-		if (left.x > right.x)
-			return false;
-		return left.y < right.y;
+		double xDistance = x - point.x;
+		double yDistance = y - point.y;
+		return sqrt(xDistance * xDistance + yDistance * yDistance);
 	}
 };
 
 class DBSCAN
 {
-	set<Point> setOfPoints;
+	unordered_set<Point*> setOfPoints;
 	double epsilon;
 	unsigned int minimumAmountOfPoints;
 	unsigned int amountOfClusters;
 
 public:
 	// constructors
-	DBSCAN(set<Point> setOfPoints, double epsilon, int minimumAmountOfPoints)
+	DBSCAN(unordered_set<Point*> setOfPoints, double epsilon, int minimumAmountOfPoints)
 	{
 		this->setOfPoints = setOfPoints;
 		this->epsilon = epsilon;
@@ -72,72 +68,73 @@ public:
 	// destructors
 	~DBSCAN() {}
 
+	// methods
 	void clusterAlgorithm()
 	{
-		for (Point point : setOfPoints)
+		for (Point* point : setOfPoints)
 		{
-			if (point.getLabel() != unclassified)
+			if (point->getLabel() != unclassified)
 				continue;
-			set<Point> neighbors = rangeQuery(point);
+			unordered_set<Point*> neighbors = rangeQuery(point);
 			if (neighbors.size() < minimumAmountOfPoints)
 			{
-				point.setLabel(noise);
+				point->setLabel(noise);
 				continue;
 			}
 			amountOfClusters++;
-			point.setLabel(amountOfClusters);
-			set<Point> seed = neighbors;
+			point->setLabel(amountOfClusters);
+			unordered_set<Point*> seed = neighbors;
 			seed.erase(point);
-			for (Point point : seed)
+			for (Point* point : seed)
 			{
-				if (point.getLabel() == noise)
-					point.setLabel(amountOfClusters);
-				if (point.getLabel() != unclassified)
+				if (point->getLabel() == noise)
+					point->setLabel(amountOfClusters);
+				if (point->getLabel() != unclassified)
 					continue;
-				point.setLabel(amountOfClusters);
+				point->setLabel(amountOfClusters);
 				neighbors = rangeQuery(point);
 				if (neighbors.size() >= minimumAmountOfPoints)
-					for (Point point : neighbors)
-							seed.insert(point);
+					for (Point* point : neighbors)
+						seed.insert(point);
 			}
 		}
 	}
 
-	set<Point> rangeQuery(Point& currentPoint)
+	unordered_set<Point*> rangeQuery(Point* currentPoint)
 	{
-		set<Point> neighbors;
-		for (Point point : setOfPoints)
-			if (currentPoint.distance(point) <= epsilon)
+		unordered_set<Point*> neighbors;
+		for (Point* point : setOfPoints)
+			if (currentPoint->distance(*point) <= epsilon)
 				neighbors.insert(point);
 		return neighbors;
 	}
-
-	set<Point> getSetOfPoints() { return this->setOfPoints; }
 };
 
-int main()
+int main(void)
 {
-	set<Point> dataBase;
-	dataBase.insert(Point(0.0, 0.0));
-	dataBase.insert(Point(1.0, 1.0));
-	dataBase.insert(Point(1.0, 2.0));
-	dataBase.insert(Point(1.0, 3.0));
-	dataBase.insert(Point(1.0, 6.0));
-	dataBase.insert(Point(2.0, 6.0));
-	dataBase.insert(Point(2.0, 2.0));
-	dataBase.insert(Point(5.0, 1.0));
-	dataBase.insert(Point(5.0, 2.0));
-	dataBase.insert(Point(6.0, 1.0));
-	dataBase.insert(Point(6.0, 2.0));
+	unordered_set<Point*> dataBase;
+	ifstream inFile;
+	double x, y;
 
+	// read the coordinateds from the file
+	inFile.open("Set of Points.txt");
+	while (inFile >> x >> y)
+		dataBase.insert(new Point(x, y));
+	inFile.close();
+
+	// run the clustering 
 	DBSCAN cluster(dataBase, 2.0, 4);
-
 	cluster.clusterAlgorithm();
 
-	for (Point point : cluster.getSetOfPoints())
-		cout << point.getLabel() << " ";
+	// (x, y, cluster the point belongs)
+	for (Point* point : dataBase)
+	{
+		cout << "(" << point->getX() << ", " << point->getY() << ", " << point->getLabel() << ") ";
+		delete point;
+		point = nullptr;
+	}
+	cout << endl;
 
 	system("pause");
-
 	return 0;
 }
