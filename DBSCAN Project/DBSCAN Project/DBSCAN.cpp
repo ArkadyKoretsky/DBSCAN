@@ -2,6 +2,8 @@
 #include <cmath>
 #include <unordered_set>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -110,13 +112,15 @@ public:
 	}
 };
 
+
+
 int main(void)
 {
 	unordered_set<Point*> dataBase;
 	ifstream inFile;
 	double x, y;
 
-	// read the coordinateds from the file
+	// read the coordinateds from the text file
 	inFile.open("Set of Points.txt");
 	while (inFile >> x >> y)
 		dataBase.insert(new Point(x, y));
@@ -126,10 +130,22 @@ int main(void)
 	DBSCAN cluster(dataBase, 2.0, 4);
 	cluster.clusterAlgorithm();
 
-	// (x, y, cluster the point belongs)
-	for (Point* point : dataBase)
+	// the sorting is just to show you the points in each cluster (in the printing)
+	vector<Point*> sortedPointsByLabel(dataBase.begin(), dataBase.end());
+	sort(sortedPointsByLabel.begin(), sortedPointsByLabel.end(), [](Point* A, Point* B) {return A->getLabel() < B->getLabel(); });
+
+	// print the clusters
+	int label = sortedPointsByLabel[0]->getLabel();
+	cout << "Noise Points: ";
+	for (Point* point : sortedPointsByLabel)
 	{
-		cout << "(" << point->getX() << ", " << point->getY() << ", " << point->getLabel() << ") ";
+		if (point->getLabel() != label)
+		{
+			cout << endl;
+			label = point->getLabel();
+			cout << "Cluster Number " << label << ": ";
+		}
+		cout << "(" << point->getX() << " , " << point->getY() << ") ";
 		delete point;
 		point = nullptr;
 	}
