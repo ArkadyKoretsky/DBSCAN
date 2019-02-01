@@ -4,11 +4,15 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <ctime>
+#include <random>
 
 using namespace std;
 
 #define noise -1
 #define unclassified 0
+#define amountOfPoints 100
+#define range 50
 
 class Point
 {
@@ -112,23 +116,34 @@ public:
 	}
 };
 
-
-
 int main(void)
 {
 	unordered_set<Point*> dataBase;
-	ifstream inFile;
+	//ifstream inFile;
 	double x, y;
 
 	// read the coordinateds from the text file
-	inFile.open("Set of Points.txt");
+	/*inFile.open("Set of Points.txt");
 	while (inFile >> x >> y)
 		dataBase.insert(new Point(x, y));
-	inFile.close();
+	inFile.close();*/
+
+	// generate the points randomly
+	srand(time(NULL));
+	for (int i = 0; i < amountOfPoints; i++)
+	{
+		x = rand() % range;
+		y = rand() % range;
+		dataBase.insert(new Point(x, y));
+	}
 
 	// run the clustering 
-	DBSCAN cluster(dataBase, 2.0, 4);
+	DBSCAN cluster(dataBase, 3.0, 4);
+	clock_t begin = clock();
 	cluster.clusterAlgorithm();
+	clock_t end = clock();
+	double elapsedTime = double(end - begin) / CLOCKS_PER_SEC;
+	cout << "Time in Seconds: " << elapsedTime << endl;
 
 	// the sorting is just to show you the points in each cluster (in the printing)
 	vector<Point*> sortedPointsByLabel(dataBase.begin(), dataBase.end());
