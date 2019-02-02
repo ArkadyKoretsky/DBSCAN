@@ -116,19 +116,19 @@ public:
 	}
 };
 
-int main(void)
+void createPointsFromFile(unordered_set<Point*>& dataBase)
 {
-	unordered_set<Point*> dataBase;
-	//ifstream inFile;
+	ifstream inFile;
 	double x, y;
-
-	// read the coordinateds from the text file
-	/*inFile.open("Set of Points.txt");
+	inFile.open("Set of Points.txt");
 	while (inFile >> x >> y)
 		dataBase.insert(new Point(x, y));
-	inFile.close();*/
+	inFile.close();
+}
 
-	// generate the points randomly
+void generateRandomPoints(unordered_set<Point*>& dataBase)
+{
+	double x, y;
 	srand(time(NULL));
 	for (int i = 0; i < amountOfPoints; i++)
 	{
@@ -136,15 +136,16 @@ int main(void)
 		y = rand() % range;
 		dataBase.insert(new Point(x, y));
 	}
+}
 
-	// run the clustering 
-	DBSCAN cluster(dataBase, 3.0, 4);
-	clock_t begin = clock();
-	cluster.clusterAlgorithm();
-	clock_t end = clock();
+void printElapsedTime(clock_t begin, clock_t end)
+{
 	double elapsedTime = double(end - begin) / CLOCKS_PER_SEC;
 	cout << "Time in Seconds: " << elapsedTime << endl;
+}
 
+void printPointsAndClusters(unordered_set<Point*>& dataBase)
+{
 	// the sorting is just to show you the points in each cluster (in the printing)
 	vector<Point*> sortedPointsByLabel(dataBase.begin(), dataBase.end());
 	sort(sortedPointsByLabel.begin(), sortedPointsByLabel.end(), [](Point* A, Point* B) {return A->getLabel() < B->getLabel(); });
@@ -165,6 +166,26 @@ int main(void)
 		point = nullptr;
 	}
 	cout << endl;
+}
+
+int main(void)
+{
+	unordered_set<Point*> dataBase;
+	double epsilon = 2;
+	unsigned int minimumPoints = 4;
+
+	createPointsFromFile(dataBase);
+
+	//generateRandomPoints(dataBase);
+
+	// run the clustering 
+	DBSCAN dbscan(dataBase, epsilon, minimumPoints);
+	//clock_t begin = clock();
+	dbscan.clusterAlgorithm();
+	//clock_t end = clock();
+	//printElapsedTime(begin, end);
+
+	printPointsAndClusters(dataBase);
 
 	system("pause");
 	return 0;
