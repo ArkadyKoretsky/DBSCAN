@@ -11,8 +11,6 @@ using namespace std;
 
 #define noise -1
 #define unclassified 0
-#define amountOfPoints 100
-#define range 50
 
 class Point
 {
@@ -129,6 +127,7 @@ void createPointsFromFile(unordered_set<Point*>& dataBase)
 void generateRandomPoints(unordered_set<Point*>& dataBase)
 {
 	double x, y;
+	unsigned int amountOfPoints = 100, range = 50;
 	srand(time(NULL));
 	for (int i = 0; i < amountOfPoints; i++)
 	{
